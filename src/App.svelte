@@ -1,48 +1,31 @@
 <script>
   import { onMount } from "svelte";
-  export let date;
-
-  onMount(async () => {
-    const res = await fetch("/api/date");
-    const newDate = await res.text();
-    date = newDate;
-  });
+  export let acid = "acid"
+  export let record = 0
+  onMount(async e => record = await (await fetch("/api/record")).json())
+  function type(e) {
+    if (acid.length > 10) return;
+    let isDigit = (e.keyCode >= 48 && e.keyCode <= 57)
+    let isLower = (e.keyCode >= 97 && e.keyCode <= 122)
+    let isUpper = (e.keyCode >= 65 && e.keyCode <= 90)
+    let isGood = [33, 35, 64, 36, 38].includes(e.keyCode) // ! # @ $ &
+    if(isDigit || isLower || isUpper || isGood) {
+      acid = acid ? acid + e.key : e.key
+    }
+  }
+  function operate(e) {
+    if(e.keyCode === 8) {
+      acid = acid.length > 1 ? acid.slice(0, acid.length - 1) : null
+    }
+  }
 </script>
 
 <main>
-  <h1>Svelte + Node.js API</h1>
+  <h1>type{acid || ""}</h1>
   <h2>
-    Deployed with
-    <a href="https://zeit.co/docs" target="_blank" rel="noreferrer noopener">
-      ZEIT Now
-    </a>
-    !
+    is coming !
   </h2>
-  <p>
-    <a
-      href="https://github.com/zeit/now/tree/master/examples/svelte"
-      target="_blank"
-      rel="noreferrer noopener">
-      This project
-    </a>
-    is a
-    <a href="https://svelte.dev/">Svelte</a>
-    app with three directories,
-    <code>/public</code>
-    for static assets,
-    <code>/src</code>
-    for components and content, and
-    <code>/api</code>
-    which contains a serverless
-    <a href="https://nodejs.org/en/">Node.js</a>
-    function. See
-    <a href="/api/date">
-      <code>api/date</code>
-      for the Date API with Node.js
-    </a>
-    .
-  </p>
-  <br />
-  <h2>The date according to Node.js is:</h2>
-  <p>{date ? date : 'Loading date...'}</p>
+  <p>{record} <img alt="views" src="https://img.icons8.com/material-outlined/15/000000/visible.png"></p>
 </main>
+
+<svelte:window on:keypress={type} on:keydown={operate}/>
